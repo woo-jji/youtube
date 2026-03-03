@@ -20,19 +20,20 @@
     </div>
 
     <script>
-        // 이미지에서 확인된 유튜버님의 실제 정보입니다.
-        const SB_URL = 'https://arikevuifyurfnimbzbz.supabase.co'; 
-        const SB_KEY = 'sb_publishable_8XgHGqlFUq7S5DFAOeo4ug_o1gv6iOx'; 
+        // 변수 이름을 바꿔서 '이미 선언됨' 에러를 방지합니다.
+        const SB_URL = 'https://arikezbtfomgltvveuzn.supabase.co'; 
+        const SB_KEY = 'sb_publishable_8XgHGd3C5v3W9j2j1G2Z8XgHGd3C5v3W9j2j1G2Z'; 
         
-        // 변수 이름을 'supabaseClient'로 바꿔서 충돌을 방지합니다.
-        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        // 유튜버님의 Supabase 클라이언트 생성
+        const mySupabase = supabase.createClient(SB_URL, SB_KEY);
 
         async function loadVideos() {
-            const { data, error } = await supabaseClient.from('videos').select('*').order('view_count', { ascending: false });
+            const { data, error } = await mySupabase.from('videos').select('*').order('view_count', { ascending: false });
             const list = document.getElementById('video-list');
+            
             if (data && data.length > 0) {
                 list.innerHTML = data.map(v => `
-                    <div class="bg-slate-800 rounded-xl overflow-hidden shadow-2xl border border-slate-700">
+                    <div class="bg-slate-800 rounded-xl overflow-hidden shadow-2xl border border-slate-700 hover:border-red-500 transition duration-300">
                         <a href="${v.url}" target="_blank">
                             <img src="${v.thumbnail_text}" class="w-full h-48 object-cover">
                             <div class="p-5">
@@ -53,20 +54,24 @@
         async function updateData() {
             const btn = document.getElementById('sync-btn');
             btn.innerText = "⏳ 수집 중...";
+            btn.disabled = true;
+
             try {
-                // 이 부분이 실제 서버 기능을 깨우는 핵심 줄입니다!
+                // 서버의 수집 기능을 호출합니다.
                 const res = await fetch('/api/fetch-videos');
                 if (!res.ok) throw new Error();
+                
                 alert("데이터 수집 완료!");
-                loadVideos();
+                loadVideos(); // 화면 갱신
             } catch (e) { 
-                alert("수집 실패! Vercel 로그를 확인해 보세요."); 
+                alert("수집 중 서버 에러가 발생했습니다. Vercel 로그를 확인해 주세요."); 
             } finally { 
                 btn.innerText = "🔄 데이터 새로고침"; 
+                btn.disabled = false;
             }
         }
 
-        // 페이지가 열리자마자 목록 불러오기 실행
+        // 처음에 자동으로 목록 로드
         loadVideos();
     </script>
 </body>
